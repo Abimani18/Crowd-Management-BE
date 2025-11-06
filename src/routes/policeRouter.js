@@ -7,6 +7,10 @@ const policeRouter = express.Router();
 
 policeRouter.post("/create",validatePolice,Auth,roleMiddleware("Admin"),policeController.createPolice);
 policeRouter.post("/login",policeController.loginPolice);
+policeRouter.get("/allPolice",validatePolice,Auth,roleMiddleware("Admin"),policeController.getAllPolice);
+policeRouter.get("/:id",validatePolice,Auth,roleMiddleware("Admin"),policeController.getPoliceById);
+policeRouter.put("/update/:id",Auth,roleMiddleware("Admin"),policeController.updatePolice);
+policeRouter.delete("/delete/:id",validatePolice,Auth,roleMiddleware("Admin"),policeController.deletePolice);
 
 
 module.exports = policeRouter;

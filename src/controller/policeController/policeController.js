@@ -1,77 +1,70 @@
 const Police = require("../../models/polish");
 const Role = require("../../models/role");
 const JWT = require("jsonwebtoken");
-const Config = require("../../config/config")
+const Config = require("../../config/config");
 
-const policeController = ({
-createPolice : async (req, res) => {
-  try {
-    const { name, policeId, stationName, location, phone } = req.body;
+const policeController = {
+  // ✅ Create Police
+  createPolice: async (req, res) => {
+    try {
+      const { name, policeId, stationName, location, phone, photo } = req.body;
 
-    // ✅ Validate input
-    if (!name || !policeId || !stationName || !location || !phone ) {
-      return res.status(400).json({ message: "All fields are required" });
+      if (!name || !policeId || !stationName || !location || !phone) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const existing = await Police.findOne({ policeId });
+      if (existing) {
+        return res.status(400).json({ message: "Police ID already exists" });
+      }
+
+      const role = await Role.findOne({ name: "Police" });
+      if (!role) {
+        return res.status(404).json({ message: "Default role not found" });
+      }
+
+      const newPolice = await Police.create({
+        name,
+        policeId,
+        stationName,
+        location,
+        phone,
+        photo: photo || "https://example.com/default-police-photo.jpg",
+        roleId: role._id,
+      });
+
+      res.status(201).json({
+        message: "Police record created successfully",
+        police: newPolice,
+      });
+    } catch (error) {
+      console.error("❌ Error creating police:", error);
+      res.status(500).json({ message: error.message });
     }
+  },
 
-    // ✅ Check duplicate
-    const existing = await Police.findOne({ policeId });
-    if (existing) {
-      return res.status(400).json({ message: "Police ID already exists" });
-    }
-
-   const role = await Role.findOne({name:"Police"})
-  if(!role){
-    return res.status(404).json({message:"Default role not found"})
-  }
-    // ✅ Save new record
-    const newPolice = await Police.create({
-      name,
-      policeId,
-      stationName,
-      location,
-      phone,
-      roleId:role._id
-    });
-
-    res.status(201).json({
-      message: "Police record created successfully",
-      police: newPolice,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-},
-loginPolice: async (req, res) => {
+  // ✅ Police Login
+  loginPolice: async (req, res) => {
     try {
       const { policeId, phone } = req.body;
 
-      // Validate input
       if (!policeId || !phone) {
         return res
           .status(400)
           .json({ message: "Missing required fields: policeId or phone" });
       }
 
-      // Find police record
       const police = await Police.findOne({ policeId, phone }).populate("roleId");
-
       if (!police) {
-        return res
-          .status(404)
-          .json({ message: "Invalid Police ID or Phone number" });
+        return res.status(404).json({ message: "Invalid Police ID or Phone number" });
       }
 
-      // Generate JWT token
       const token = JWT.sign(
-        {
-          id: police._id,
-          role: police.roleId.name,
-        },
-        Config.SECRET_KEY, // or use from config
+        { id: police._id, role: police.roleId.name },
+        Config.SECRET_KEY,
         { expiresIn: "1d" }
       );
 
-      // Response
       res.status(200).json({
         message: "Login successful",
         police: {
@@ -80,14 +73,109 @@ loginPolice: async (req, res) => {
           policeId: police.policeId,
           stationName: police.stationName,
           location: police.location,
+          phone: police.phone,
+          photo: police.photo,
           role: police.roleId.name,
+          status: police.status,
         },
         token,
       });
     } catch (error) {
+      console.error("❌ Error logging in police:", error);
       res.status(500).json({ message: error.message });
     }
+  },
+
+  // ✅ Get All Police
+  getAllPolice: async (req, res) => {
+    try {
+      const policeList = await Police.find().populate("roleId", "name");
+
+      if (!policeList.length) {
+        return res.status(404).json({ message: "No police records found" });
+      }
+
+      res.status(200).json({
+        message: "Police records fetched successfully",
+        total: policeList.length,
+        data: policeList,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching police list:", error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // ✅ Get One Police by ID
+  getPoliceById: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const police = await Police.findById(id).populate("roleId", "name");
+      if (!police) {
+        return res.status(404).json({ message: "Police not found" });
+      }
+
+      res.status(200).json({
+        message: "Police fetched successfully",
+        data: police,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching police by ID:", error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  // ✅ Update Police
+// ✅ Update Police (Status or Any Field)
+updatePolice: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Remove null/empty values
+    Object.keys(updates).forEach((key) => {
+      if (updates[key] === "" || updates[key] === null || updates[key] === undefined) {
+        delete updates[key];
+      }
+    });
+
+    const updatedPolice = await Police.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedPolice) {
+      return res.status(404).json({ message: "Police not found" });
+    }
+
+    res.status(200).json({
+      message: "Police record updated successfully",
+      data: updatedPolice,
+    });
+  } catch (error) {
+    console.error("❌ Error updating police:", error);
+    res.status(500).json({ message: error.message });
   }
-})
+},
+
+
+  // ✅ Delete Police
+  deletePolice: async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const deletedPolice = await Police.findByIdAndDelete(id);
+      if (!deletedPolice) {
+        return res.status(404).json({ message: "Police not found" });
+      }
+
+      res.status(200).json({ message: "Police deleted successfully",deletedPolice });
+    } catch (error) {
+      console.error("❌ Error deleting police:", error);
+      res.status(500).json({ message: error.message });
+    }
+  },
+};
 
 module.exports = policeController;

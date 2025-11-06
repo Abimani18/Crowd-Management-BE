@@ -22,11 +22,20 @@ const policeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-   roleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "role",
-      required: true,
-    },
+  photo: {
+    type: String, // store the image URL or file path
+    default: "https://example.com/default-police-photo.jpg", // fallback if no photo provided
+  },
+  status: {
+    type: String,
+    enum: ["Active", "Inactive"], // only allow these two values
+    default: "Active", // default is active
+  },
+  roleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "role",
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
