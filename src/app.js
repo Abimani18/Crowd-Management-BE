@@ -5,12 +5,14 @@ const roleRouter = require("./routes/roleRouter");
 const userRouter = require("./routes/userRouter");
 const policeRouter = require("./routes/policeRouter");
 const missingRouter = require("./routes/missingRoter");
-const reportingRouter = require("./routes/reportingRouter")
+const reportingRouter = require("./routes/reportingRouter");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/role",roleRouter);
 app.use("/api/user",userRouter);

@@ -5,9 +5,9 @@ const Config = require("../../config/config");
 
 const policeController = {
   // ✅ Create Police
-  createPolice: async (req, res) => {
+    createPolice: async (req, res) => {
     try {
-      const { name, policeId, stationName, location, phone, photo } = req.body;
+      const { name, policeId, stationName, location, phone } = req.body;
 
       if (!name || !policeId || !stationName || !location || !phone) {
         return res.status(400).json({ message: "All fields are required" });
@@ -23,13 +23,18 @@ const policeController = {
         return res.status(404).json({ message: "Default role not found" });
       }
 
+      // ✅ Use uploaded file or default image
+      const photoPath = req.file
+        ? `/uploads/${req.file.filename}`
+        : "https://example.com/default-police-photo.jpg";
+
       const newPolice = await Police.create({
         name,
         policeId,
         stationName,
         location,
         phone,
-        photo: photo || "https://example.com/default-police-photo.jpg",
+        photo: photoPath,
         roleId: role._id,
       });
 

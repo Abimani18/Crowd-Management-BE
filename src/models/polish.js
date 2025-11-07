@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const policeSchema = new mongoose.Schema({
@@ -24,7 +25,7 @@ const policeSchema = new mongoose.Schema({
   },
   photo: {
     type: String, // store the image URL or file path
-    default: "https://example.com/default-police-photo.jpg", // fallback if no photo provided
+    required:true
   },
   status: {
     type: String,
