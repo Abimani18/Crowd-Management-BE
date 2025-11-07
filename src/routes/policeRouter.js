@@ -11,6 +11,7 @@ policeRouter.post("/login",policeController.loginPolice);
 policeRouter.get("/allPolice",validatePolice,Auth,roleMiddleware("Admin"),policeController.getAllPolice);
 policeRouter.get("/:id",validatePolice,Auth,roleMiddleware("Admin"),policeController.getPoliceById);
 policeRouter.put("/update/:id",Auth,roleMiddleware("Admin"),policeController.updatePolice);
+policeRouter.put("/status/:id",Auth,roleMiddleware("Admin"),policeController.updateStatus);
 policeRouter.delete("/delete/:id",validatePolice,Auth,roleMiddleware("Admin"),policeController.deletePolice);
 
 

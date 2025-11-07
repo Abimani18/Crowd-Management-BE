@@ -164,6 +164,37 @@ updatePolice: async (req, res) => {
   }
 },
 
+// ✅ Update Police Status (Active / Inactive)
+updateStatus: async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status field
+    if (!status || !["Active", "Inactive"].includes(status)) {
+      return res
+        .status(400)
+        .json({ message: "Status must be either 'Active' or 'Inactive'" });
+    }
+
+    const police = await Police.findById(id);
+    if (!police) {
+      return res.status(404).json({ message: "Police not found" });
+    }
+
+    police.status = status;
+    await police.save();
+
+    res.status(200).json({
+      message: `Police status updated to ${status}`,
+      data: police,
+    });
+  } catch (error) {
+    console.error("❌ Error updating police status:", error);
+    res.status(500).json({ message: error.message });
+  }
+},
+
 
   // ✅ Delete Police
   deletePolice: async (req, res) => {
