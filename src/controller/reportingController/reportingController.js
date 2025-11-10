@@ -6,6 +6,7 @@ const foundChildController = {
   createFoundReport: async (req, res) => {
     try {
       const {
+        childName,
         childPhoto,
         estimatedAge,
         gender,
@@ -22,6 +23,7 @@ const foundChildController = {
 
       const newFound = await FoundChildReport.create({
         foundBy: req.user._id, // police user
+        childName,
         childPhoto,
         estimatedAge,
         gender,

@@ -6,6 +6,9 @@ const foundChildReportSchema = new mongoose.Schema({
     ref: "police",
     required: true,
   },
+  childName:{
+    type: String,
+  },
   childPhoto: {
     type: String,
     required: true,
