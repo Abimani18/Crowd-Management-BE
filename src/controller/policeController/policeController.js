@@ -1,4 +1,4 @@
-const Police = require("../../models/polish");
+const Police = require("../../models/police");
 const Role = require("../../models/role");
 const JWT = require("jsonwebtoken");
 const Config = require("../../config/config");

@@ -1,58 +1,114 @@
 const MissingChild = require("../../models/missing");
+const { io } = require("../../main"); 
 
 const missingChildController = {
   // ✅ Create a Missing Child Report
+  // createMissingReport: async (req, res) => {
+  //   try {
+  //     const {
+  //       childName,
+  //       age,
+  //       gender,
+  //       photo,
+  //       dressDescription,
+  //       lastSeenLocation,
+  //       dateMissing,
+  //       parentName,
+  //       parentPhone,
+  //     } = req.body;
+
+  //     // Validation
+  //     if (
+  //       !age ||
+  //       !gender ||
+  //       !photo ||
+  //       !dressDescription ||
+  //       !lastSeenLocation ||
+  //       !dateMissing ||
+  //       !parentName ||
+  //       !parentPhone
+  //     ) {
+  //       return res.status(400).json({ message: "All fields are required" });
+  //     }
+
+  //     // Create new report
+  //     const newReport = await MissingChild.create({
+  //       childName,
+  //       age,
+  //       gender,
+  //       photo,
+  //       dressDescription,
+  //       lastSeenLocation,
+  //       dateMissing,
+  //       parentName,
+  //       parentPhone,
+  //       reportedAtStation: req.user._id, // logged-in police user
+  //     });
+
+  //     res.status(201).json({
+  //       message: "Missing child report created successfully",
+  //       report: newReport,
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // },
+
   createMissingReport: async (req, res) => {
-    try {
-      const {
-        childName,
-        age,
-        gender,
-        photo,
-        dressDescription,
-        lastSeenLocation,
-        dateMissing,
-        parentName,
-        parentPhone,
-      } = req.body;
+  try {
+    const {
+      childName,
+      age,
+      gender,
+      photo,
+      dressDescription,
+      lastSeenLocation,
+      dateMissing,
+      parentName,
+      parentPhone,
+    } = req.body;
 
-      // Validation
-      if (
-        !age ||
-        !gender ||
-        !photo ||
-        !dressDescription ||
-        !lastSeenLocation ||
-        !dateMissing ||
-        !parentName ||
-        !parentPhone
-      ) {
-        return res.status(400).json({ message: "All fields are required" });
-      }
-
-      // Create new report
-      const newReport = await MissingChild.create({
-        childName,
-        age,
-        gender,
-        photo,
-        dressDescription,
-        lastSeenLocation,
-        dateMissing,
-        parentName,
-        parentPhone,
-        reportedAtStation: req.user._id, // logged-in police user
-      });
-
-      res.status(201).json({
-        message: "Missing child report created successfully",
-        report: newReport,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: error.message });
+    if (
+      !age ||
+      !gender ||
+      !photo ||
+      !dressDescription ||
+      !lastSeenLocation ||
+      !dateMissing ||
+      !parentName ||
+      !parentPhone
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-  },
+
+    const newReport = await MissingChild.create({
+      childName,
+      age,
+      gender,
+      photo,
+      dressDescription,
+      lastSeenLocation,
+      dateMissing,
+      parentName,
+      parentPhone,
+      reportedAtStation: req.user._id,
+    });
+
+    // ✅ Emit real-time alert to all police devices
+    io.emit("new-missing-report", {
+      message: "🚨 New Missing Child Report!",
+      report: newReport,
+    });
+
+    res.status(201).json({
+      message: "Missing child report created successfully",
+      report: newReport,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+},
 
   // ✅ Get all missing child reports
   getAllMissingReports: async (req, res) => {
