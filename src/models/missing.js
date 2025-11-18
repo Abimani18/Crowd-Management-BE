@@ -40,7 +40,7 @@ const missingChildSchema = new mongoose.Schema({
     required: true,
     match: /^[0-9]{10}$/,
   },
-  reportedAtStation: {
+  reportedAtPolice: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "police", // which police station took the report
     required: true,

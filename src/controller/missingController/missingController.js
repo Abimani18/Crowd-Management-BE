@@ -24,7 +24,6 @@ const missingChildController = {
         dateMissing,
         parentName,
         parentPhone,
-        reportedAtStation,
       } = req.body;
 
       // Create new report
@@ -38,8 +37,7 @@ const missingChildController = {
         dateMissing,
         parentName,
         parentPhone,
-        reportedAtStation,
-        createdByPolice: req.user._id,
+        reportedAtPolice: req.user._id 
       });
 
       await newReport.save();
