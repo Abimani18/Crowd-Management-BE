@@ -85,7 +85,7 @@ const missingChildController = {
   getAllMissingReports: async (req, res) => {
     try {
       const reports = await MissingChild.find()
-        .populate("reportedAtStation", "name stationName phone")
+        .populate("reportedAtPolice", "name stationName phone")
         .sort({ createdAt: -1 });
 
       res.status(200).json({ reports });

@@ -204,6 +204,7 @@ const foundChildController = {
         childName: r.childName,
         gender: r.gender,
         estimatedAge: r.estimatedAge,
+        photo: r.childPhoto,
         foundLocation: r.foundLocation,
         status: r.status,
         createdAt: new Date(r.createdAt).toLocaleString("en-IN"),
