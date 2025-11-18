@@ -37,6 +37,11 @@ const policeSchema = new mongoose.Schema({
     ref: "role",
     required: true,
   },
+  expoPushToken: {
+    type: String,
+    default: null, // store Expo push token for notifications
+  },
+  
   createdAt: {
     type: Date,
     default: Date.now,

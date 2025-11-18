@@ -1,48 +1,89 @@
+
+
+
 const MissingChild = require("../../models/missing");
-const { io } = require("../../main"); 
+const Police = require("../../models/police");     // ✅ Police model
+const { Expo } = require("expo-server-sdk");       // ✅ Expo SDK
+
+const expo = new Expo();
 
 const missingChildController = {
+
+  // ==========================
+  // ✅ Create Missing Child Report + Send Push Alerts
+  // ==========================
   createMissingReport: async (req, res) => {
-  try {
-    const {
-      childName,
-      age,
-      gender,
-      photo,
-      dressDescription,
-      lastSeenLocation,
-      dateMissing,
-      parentName,
-      parentPhone,
-      reportedAtStation,
-    } = req.body;
+    try {
+      const {
+        childName,
+        age,
+        gender,
+        photo,
+        dressDescription,
+        lastSeenLocation,
+        dateMissing,
+        parentName,
+        parentPhone,
+        reportedAtStation,
+      } = req.body;
 
-    const newReport = new MissingChild({
-      childName,
-      age,
-      gender,
-      photo,
-      dressDescription,
-      lastSeenLocation,
-      dateMissing,
-      parentName,
-      parentPhone,
-      reportedAtStation,
-      createdByPolice: req.user._id, // ✅ logged-in Police’s ID from Auth middleware
-    });
+      // Create new report
+      const newReport = new MissingChild({
+        childName,
+        age,
+        gender,
+        photo,
+        dressDescription,
+        lastSeenLocation,
+        dateMissing,
+        parentName,
+        parentPhone,
+        reportedAtStation,
+        createdByPolice: req.user._id,
+      });
 
-    await newReport.save();
+      await newReport.save();
+      
 
-    res.status(201).json({
-      message: "Missing child report created successfully",
-      report: newReport,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error creating report", error: error.message });
-  }
-},
+    console.log(newReport);
+      // ✅ Notify all police with push tokens
+    const allPolice = await Police.find({ expoPushToken: { $exists: true } });
 
-  // ✅ Get all missing child reports
+    const messages = allPolice.map((p) => (
+      console.log(p),
+      {
+      to: p.expoPushToken,
+      sound: "alarme-401847.wav",  
+      title: "New Missing Report",
+      body: `A report for ${childName} (${gender}, ${age}) was submitted.`,
+      data: { reportId: newReport._id  },
+    }));
+
+    const chunks = expo.chunkPushNotifications(messages);
+    for (let chunk of chunks) {
+      try {
+        await expo.sendPushNotificationsAsync(chunk);
+      } catch (err) {
+        console.error("Push error:", err);
+      }
+    }
+      // ==========================================
+      // 🔥 4. Send response back to client
+      // ==========================================
+      res.status(201).json({
+        message: "Missing report created & alerts sent successfully",
+        report: newReport,
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error creating report", error: error.message });
+    }
+  },
+
+  // ==========================
+  // ✅ Get all missing reports
+  // ==========================
   getAllMissingReports: async (req, res) => {
     try {
       const reports = await MissingChild.find()
@@ -55,27 +96,29 @@ const missingChildController = {
     }
   },
 
-  // ✅ Get a particular missing child report by ID
-getMissingReportById: async (req, res) => {
-  try {
-    const { id } = req.params;
+  // ==========================
+  // ✅ Get report by ID
+  // ==========================
+  getMissingReportById: async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    // Find the report and populate the police station info
-    const report = await MissingChild.findById(id)
-      .populate("reportedAtStation", "name stationName phone");
+      const report = await MissingChild.findById(id)
+        .populate("reportedAtStation", "name stationName phone");
 
-    if (!report) {
-      return res.status(404).json({ message: "Missing child report not found" });
+      if (!report) {
+        return res.status(404).json({ message: "Missing child report not found" });
+      }
+
+      res.status(200).json({ report });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
+  },
 
-    res.status(200).json({ report });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-},
-
-
-  // ✅ Update report status to "Found" (after match)
+  // ==========================
+  // ✅ Update report status
+  // ==========================
   updateReportStatus: async (req, res) => {
     try {
       const { id } = req.params;
