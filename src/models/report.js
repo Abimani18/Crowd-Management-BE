@@ -74,6 +74,10 @@ const foundChildReportSchema = new mongoose.Schema({
     type: String,
     enum: ["Male", "Female", "Other"],
   },
+   language:{
+      type: String,
+    required: true,
+  },
   dressDescription: {
     type: String,
   },

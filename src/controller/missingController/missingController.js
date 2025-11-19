@@ -24,6 +24,7 @@ const missingChildController = {
         dateMissing,
         parentName,
         parentPhone,
+        language
       } = req.body;
 
       // Create new report
@@ -32,6 +33,7 @@ const missingChildController = {
         age,
         gender,
         photo,
+        language,
         dressDescription,
         lastSeenLocation,
         dateMissing,
