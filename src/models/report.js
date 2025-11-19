@@ -74,6 +74,10 @@ const foundChildReportSchema = new mongoose.Schema({
     type: String,
     enum: ["Male", "Female", "Other"],
   },
+  fromWhere: {
+    type: String,
+    required: true,
+  },
    language:{
       type: String,
     required: true,

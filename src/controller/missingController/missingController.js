@@ -24,7 +24,8 @@ const missingChildController = {
         dateMissing,
         parentName,
         parentPhone,
-        language
+        language,
+        fromWhere,
       } = req.body;
 
       // Create new report
@@ -37,6 +38,7 @@ const missingChildController = {
         dressDescription,
         lastSeenLocation,
         dateMissing,
+        fromWhere,
         parentName,
         parentPhone,
         reportedAtPolice: req.user._id 

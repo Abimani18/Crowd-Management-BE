@@ -35,6 +35,10 @@ const missingChildSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+   fromWhere: {
+    type: String,
+    required: true,
+  },
   parentName: {
     type: String,
     required: true,
