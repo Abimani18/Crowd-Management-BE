@@ -1,6 +1,7 @@
 
 const FoundChildReport = require("../../models/report");
 const MissingChild = require("../../models/missing");
+const Police = require("../../models/police");
 
 const foundChildController = {
  createFoundReport: async (req, res) => {
@@ -292,19 +293,23 @@ getAllFoundFullDetails: async (req, res) => {
 
 caseClose: async(req,res) =>{
   try {
-     const {parentName} = req.body;
+     const {policeId,parentName} = req.body;
      const reportId = req.params.id;
-     if(!parentName){
-      return res.status(401).json({message:"missisng parentName"})
+     if(!policeId || !parentName){
+      return res.status(401).json({message:"missisng all required filled"})
      }
-       if(!reportId){
+     const police = await Police.findOne({policeId});
+     if(!police){
+      return res.status(401).json({message:"inValid policeId"})
+     }
+    if(!reportId){
       return res.status(401).json({message:"missing reportId"})
      }
      const parent = await MissingChild.findOne({parentName});
-     if(!parent){
+    if(!parent){
       return res.status(404).json({message:"parentName not found"})
      }
-     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover" },
+     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover", handoverAtPolice:policeId },
         { new: true })
         if(!missingUpdate){
           return res.status(404).json({message:"report not found"})

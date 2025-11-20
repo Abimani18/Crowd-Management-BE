@@ -53,6 +53,10 @@ const missingChildSchema = new mongoose.Schema({
     ref: "police", // which police station took the report
     required: true,
   },
+  handoverAtPolice: {
+    type:String,
+    default: "Null",
+  },
   status: {
     type: String,
     enum: ["Missing", "Found"],
