@@ -12,5 +12,7 @@ reportingRouter.get("/singleReport/:id",Auth,roleMiddleware("Police"),reportCont
 reportingRouter.post("/create", Auth, roleMiddleware("Police"), reportController.createFoundReport);
 reportingRouter.post("/matchWithMissingReport",Auth, roleMiddleware("Police"),reportController.matchWithMissingReport);
 reportingRouter.get("/full-details",  roleMiddleware("Police", "Admin"), reportController.getAllFoundFullDetails);
+reportingRouter.put("/caseClose/:id",  roleMiddleware("Police", "Admin"), reportController.caseClose);
+
 
 module.exports = reportingRouter;

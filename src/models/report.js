@@ -102,7 +102,7 @@ const foundChildReportSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Missing", "Found"],
+    enum: ["Missing", "Found", "Handover"],
     default: "Found",
   },
   createdAt: {
