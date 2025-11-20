@@ -9,7 +9,6 @@ const policeRouter = express.Router();
 // 🔹 Create Police (Admin only)
 policeRouter.post(
   "/create",
-  Auth,
   roleMiddleware("Admin"),
   upload.single("photo"),
   validatePolice,
