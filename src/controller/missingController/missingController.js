@@ -87,16 +87,21 @@ const missingChildController = {
   // ✅ Get all missing reports
   // ==========================
   getAllMissingReports: async (req, res) => {
-    try {
-      const reports = await MissingChild.find()
-        .populate("reportedAtPolice", "name stationName phone")
-        .sort({ createdAt: -1 });
+  try {
+    // Get all reports
+    const reports = await MissingChild.find()
+      .populate("reportedAtPolice", "name stationName phone")
+      .sort({ createdAt: -1 });
 
-      res.status(200).json({ reports });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
+    // Count total missing reports
+    const count = await MissingChild.countDocuments();
+
+    res.status(200).json({ count, reports });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+},
+
 
   // ==========================
   // ✅ Get report by ID
