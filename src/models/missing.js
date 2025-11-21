@@ -53,7 +53,7 @@ const missingChildSchema = new mongoose.Schema({
     ref: "police", // which police station took the report
     required: true,
   },
-  handoverAtPolice: {
+  handoverByPolice: {
     type:String,
     default: "Null",
   },

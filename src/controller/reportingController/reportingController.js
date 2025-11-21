@@ -293,36 +293,54 @@ getAllFoundFullDetails: async (req, res) => {
 
 caseClose: async(req,res) =>{
   try {
-     const {policeId,parentName} = req.body;
+     const {policeId,parentName,finderId} = req.body;
      const reportId = req.params.id;
-     if(!policeId || !parentName){
-      return res.status(401).json({message:"missisng all required filled"})
+     if(!policeId){
+      return res.status(401).json({message:"police id is required"})
      }
+     if (!parentName && !finderId) {
+      return res.status(400).json({ message: "Provide either parentName or finderId" });
+    }
+    if(!reportId){
+      return res.status(401).json({message:"missing reportId"})
+     }
+
+
      const police = await Police.findOne({policeId});
      if(!police){
       return res.status(401).json({message:"inValid policeId"})
      }
-    if(!reportId){
-      return res.status(401).json({message:"missing reportId"})
-     }
+
+    if(parentName){
      const parent = await MissingChild.findOne({parentName});
-    if(!parent){
-      return res.status(404).json({message:"parentName not found"})
-     }
-     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover", handoverAtPolice:policeId },
-        { new: true })
-        if(!missingUpdate){
-          return res.status(404).json({message:"report not found"})
-        }
-         const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover" },
-        { new: true });
-          if(!foundUpdate){
-          return res.status(404).json({message:"report not found"})
-        }
-         res.status(200).json({
+        if(!parent){return res.status(404).json({message:"parentName not found"})}
+
+     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover", handoverByPolice:policeId },{ new: true })
+        if(!missingUpdate){return res.status(404).json({message:"report not found"})}
+
+     const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId },{ new: true });
+          if(!foundUpdate){return res.status(404).json({message:"report not found"})}
+        
+      return res.status(200).json({
         message: "Report updated to Handover",
-      });
-  } catch (error) {
+      });  
+    }
+    if(finderId)
+    {
+
+      if(!finderId){
+      return res.status(401).json({message:"inValid policeId"})
+      }
+
+      const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId },{ new: true });
+          if(!foundUpdate){return res.status(404).json({message:"report not found"})}
+        
+      return res.status(200).json({
+        message: "Report updated to Handover",
+      });  
+    }
+  } 
+  catch (error) {
     res.status(500).json({message:error.message})
   }
 }

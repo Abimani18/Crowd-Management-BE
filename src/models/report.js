@@ -114,6 +114,10 @@ const foundChildReportSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  handoverByPolice: {
+    type:String,
+    default: "Null",
+  },
 });
 
 // ✅ Prevent OverwriteModelError
