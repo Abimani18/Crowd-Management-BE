@@ -185,53 +185,36 @@ matchWithMissingReport: async (req, res) => {
       return res.status(404).json({ message: "Invalid IDs provided" });
     }
 
-    // ✅ Copy missing date into found report
-    found.matchedMissingReport = missingId;
-    found.missingDate = missing.dateMissing; // store missing date/time
-    found.status = "Identified";
-    await found.save();
+    // Update found child
+    await FoundChildReport.updateOne(
+      { _id: foundId },
+      {
+        matchedMissingReport: missingId,
+        missingDate: missing.dateMissing,
+        status: "Found",
+      }
+    );
 
-    // ✅ Update missing record
-    missing.status = "Found";
-    missing.foundAt = new Date();
-    await missing.save();
+    // Update missing child safely
+    await MissingChild.updateOne(
+      { _id: missingId },
+      { status: "Found", foundAt: new Date() }
+    );
 
-    // ✅ Populate for response
-    const populatedFound = await FoundChildReport.findById(found._id)
+    const populatedFound = await FoundChildReport.findById(foundId)
       .populate("foundBy", "name policeId stationName phone")
       .populate("matchedMissingReport", "childName parentName parentPhone dateMissing lastSeenLocation");
 
     res.status(200).json({
       message: "Match successful",
-      found: {
-        id: populatedFound._id,
-        childName: populatedFound.childName,
-        gender: populatedFound.gender,
-        foundLocation: populatedFound.foundLocation,
-        status: populatedFound.status,
-        missingDate: new Date(populatedFound.missingDate).toLocaleString("en-IN"),
-        foundAt: new Date(populatedFound.foundAt).toLocaleString("en-IN"),
-        policeOfficer: {
-          name: populatedFound.foundBy?.name,
-          policeId: populatedFound.foundBy?.policeId,
-          stationName: populatedFound.foundBy?.stationName,
-          phone: populatedFound.foundBy?.phone,
-        },
-        matchedMissingReport: populatedFound.matchedMissingReport
-          ? {
-              name: populatedFound.matchedMissingReport.childName,
-              parentName: populatedFound.matchedMissingReport.parentName,
-              parentPhone: populatedFound.matchedMissingReport.parentPhone,
-              lastSeenLocation: populatedFound.matchedMissingReport.lastSeenLocation,
-              dateMissing: new Date(populatedFound.matchedMissingReport.dateMissing).toLocaleString("en-IN"),
-            }
-          : null,
-      },
+      found: populatedFound,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 },
+
+
 
 // ✅ Get all complete case details (found + missing + police)
 getAllFoundFullDetails: async (req, res) => {
@@ -291,6 +274,7 @@ getAllFoundFullDetails: async (req, res) => {
   }
 },
 
+
 caseClose: async(req,res) =>{
   try {
      const {policeId,parentName,finderId} = req.body;
@@ -343,6 +327,18 @@ caseClose: async(req,res) =>{
   catch (error) {
     res.status(500).json({message:error.message})
   }
+},
+
+parentNameMatchWithMissingReport: async (req,res) =>{
+   const {parentName} = req.body;
+   if(!parentName){
+    return res.status(404).json({message:"missing parentName"})
+   }
+   const parent = await MissingChild.findOne({parentName});
+   if(!parent){
+    return res.status(404).json({message:"report not found"})
+   }
+   res.status(200).json({message:parent})
 }
 
 };
