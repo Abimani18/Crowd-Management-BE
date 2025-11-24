@@ -61,9 +61,7 @@ policeRouter.delete(
   policeController.deletePolice
 );
 
-// =====================================
 // ✅ NEW: Save Expo Push Token (For Police Devices)
-// =====================================
 policeRouter.post("/savePushToken", roleMiddleware("Police","Admin"), policeController.savePushToken);
 
 
