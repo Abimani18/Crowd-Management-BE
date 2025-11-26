@@ -19,8 +19,7 @@ reportingRouter.get(
   reportController.getFoundReportById
 );
 
-// ❌ REMOVE this if controller doesn't have this function
-// reportingRouter.get("/full-details", roleMiddleware("Police", "Admin"), reportController.getAllFoundFullDetails);
+reportingRouter.get("/full-details", roleMiddleware("Police", "Admin"), reportController.getAllFoundFullDetails);
 
 reportingRouter.post(
   "/matchReport",

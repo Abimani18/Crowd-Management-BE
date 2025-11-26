@@ -216,6 +216,62 @@ const foundChildController = {
     }
   },
 
+  getAllFoundFullDetails: async (req, res) => {
+  try {
+    // Fetch all found reports with linked missing reports and officer details
+    const reports = await FoundChildReport.find()
+      .populate("foundBy", "name policeId stationName phone")
+      .populate("matchedMissingReport", "childName parentName parentPhone dateMissing lastSeenLocation status")
+      .sort({ createdAt: -1 });
+
+    if (!reports.length) {
+      return res.status(404).json({ message: "No found child reports available" });
+    }
+
+    // Format each report
+    const detailedReports = reports.map((r) => ({
+      foundReportId: r._id,
+      childName: r.childName || "Unknown",
+      gender: r.gender || "N/A",
+      estimatedAge: r.estimatedAge || "N/A",
+      foundLocation: r.foundLocation,
+      dressDescription: r.dressDescription || "N/A",
+      description: r.description || "N/A",
+      status: r.status,
+      missingDate: r.missingDate ? new Date(r.missingDate).toLocaleString("en-IN") : "Not linked yet",
+      foundDate: r.foundAt ? new Date(r.foundAt).toLocaleString("en-IN") : "N/A",
+
+      policeOfficer: {
+        name: r.foundBy?.name || "N/A",
+        policeId: r.foundBy?.policeId || "N/A",
+        stationName: r.foundBy?.stationName || "N/A",
+        phone: r.foundBy?.phone || "N/A",
+      },
+
+      // ✅ Linked missing child details
+      matchedMissingReport: r.matchedMissingReport
+        ? {
+            missingReportId: r.matchedMissingReport._id,
+            childName: r.matchedMissingReport.childName,
+            parentName: r.matchedMissingReport.parentName,
+            parentPhone: r.matchedMissingReport.parentPhone,
+            lastSeenLocation: r.matchedMissingReport.lastSeenLocation,
+            dateMissing: new Date(r.matchedMissingReport.dateMissing).toLocaleString("en-IN"),
+            missingStatus: r.matchedMissingReport.status,
+          }
+        : "No linked missing report",
+    }));
+
+    res.status(200).json({
+      message: "All detailed found child case records fetched successfully",
+      total: detailedReports.length,
+      reports: detailedReports,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching detailed reports", error: error.message });
+  }
+},
   // ======================================
   // ✅ CASE CLOSE + HANDOVER
   // ======================================
