@@ -22,8 +22,7 @@ policeRouter.post("/login", policeController.loginPolice);
 policeRouter.get(
   "/allPolice",
   validatePolice,
-  Auth,
-  roleMiddleware("Admin"),
+  roleMiddleware("Police"),
   policeController.getAllPolice
 );
 

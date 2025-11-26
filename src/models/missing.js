@@ -19,6 +19,7 @@ const missingChildSchema = new mongoose.Schema({
     type: [String], 
     required: true,
   },
+  reporterPhoto: { type: String },
   language:{
       type: String,
     required: true,
@@ -39,11 +40,11 @@ const missingChildSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  parentName: {
+  reporterName: {
     type: String,
     required: true,
   },
-  parentPhone: {
+  reporterPhone: {
     type: String,
     required: true,
     match: /^[0-9]{10}$/,

@@ -7,40 +7,57 @@ const { Expo } = require("expo-server-sdk");       // ✅ Expo SDK
 
 const expo = new Expo();
 
+const multer = require("multer");
+const path = require("path");
+
+
 const missingChildController = {
 
   // ==========================
   // ✅ Create Missing Child Report + Send Push Alerts
   // ==========================
   createMissingReport: async (req, res) => {
+
+    // Multer uploaded files
+    const files = req.files;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ message: "At least one photo is required" });
+    }
+
+    // Convert each uploaded file to public URL
+    const photoUrls = files.map((file) => {
+      return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
+    });
+
     try {
       const {
         childName,
         age,
         gender,
-        photo,
         dressDescription,
         lastSeenLocation,
         dateMissing,
-        parentName,
-        parentPhone,
+        reporterName,
+        reporterPhone,
         language,
         fromWhere,
       } = req.body;
 
+      console.log(language)
       // Create new report
       const newReport = new MissingChild({
         childName,
         age,
         gender,
-        photo,
+        photo: photoUrls,  
         language,
         dressDescription,
         lastSeenLocation,
         dateMissing,
         fromWhere,
-        parentName,
-        parentPhone,
+        reporterName,
+        reporterPhone,
         reportedAtPolice: req.user._id 
       });
 

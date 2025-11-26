@@ -8,7 +8,6 @@ const foundChildController = {
   try {
     const {
       childName,
-      childPhoto,
       estimatedAge,
       gender,
       fromWhere,
@@ -19,12 +18,13 @@ const foundChildController = {
       foundAt, // ✅ Manual input like "20-3-2025, 11.10"
     } = req.body;
 
-    if (!childPhoto || !foundLocation) {
+    if (!req.file || !foundLocation) {
       return res.status(400).json({
-        message: "childPhoto and foundLocation are required",
+        message: "childPhoto (file) and foundLocation are required",
       });
     }
 
+   const childPhotoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
     // ✅ Parse manual foundAt if provided
     let foundDate;
     if (foundAt) {
@@ -42,7 +42,7 @@ const foundChildController = {
     const newFound = await FoundChildReport.create({
       foundBy: req.user._id,
       childName,
-      childPhoto,
+      childPhoto: childPhotoUrl,
       language,
       estimatedAge,
       gender,
@@ -102,6 +102,7 @@ const foundChildController = {
         estimatedAge: r.estimatedAge,
         photo: r.childPhoto,
         foundLocation: r.foundLocation,
+        dressDescription:r.dressDescription,
         status: r.status,
         createdAt: new Date(r.createdAt).toLocaleString("en-IN"),
         foundAt: new Date(r.foundAt).toLocaleString("en-IN"),
@@ -277,12 +278,14 @@ getAllFoundFullDetails: async (req, res) => {
 
 caseClose: async(req,res) =>{
   try {
-     const {policeId,parentName,finderId} = req.body;
+     const {policeId,reporterName,finderId} = req.body;
      const reportId = req.params.id;
+     const reporterImage = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+     console.log(reporterImage)
      if(!policeId){
       return res.status(401).json({message:"police id is required"})
      }
-     if (!parentName && !finderId) {
+     if (!reporterName && !finderId) {
       return res.status(400).json({ message: "Provide either parentName or finderId" });
     }
     if(!reportId){
@@ -295,14 +298,14 @@ caseClose: async(req,res) =>{
       return res.status(401).json({message:"inValid policeId"})
      }
 
-    if(parentName){
-     const parent = await MissingChild.findOne({parentName});
-        if(!parent){return res.status(404).json({message:"parentName not found"})}
+    if(reporterName){
+     const parent = await MissingChild.findOne({reporterName});
+        if(!parent){return res.status(404).json({message:"reporter name  not found"})}
 
-     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover", handoverByPolice:policeId },{ new: true })
+     const missingUpdate = await MissingChild.findByIdAndUpdate(parent._id, { status: "Handover", handoverByPolice:policeId,...(reporterImage && { reporterPhoto: reporterImage }) },{ new: true })
         if(!missingUpdate){return res.status(404).json({message:"report not found"})}
 
-     const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId },{ new: true });
+     const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId ,...(reporterImage && { reporterPhoto: reporterImage })},{ new: true });
           if(!foundUpdate){return res.status(404).json({message:"report not found"})}
         
       return res.status(200).json({
@@ -316,7 +319,7 @@ caseClose: async(req,res) =>{
       return res.status(401).json({message:"inValid policeId"})
       }
 
-      const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId },{ new: true });
+      const foundUpdate = await FoundChildReport.findByIdAndUpdate(reportId,{ status: "Handover", handoverByPolice:policeId,...(reporterImage && { reporterPhoto: reporterImage }) },{ new: true });
           if(!foundUpdate){return res.status(404).json({message:"report not found"})}
         
       return res.status(200).json({
@@ -330,15 +333,18 @@ caseClose: async(req,res) =>{
 },
 
 parentNameMatchWithMissingReport: async (req,res) =>{
-   const {parentName} = req.body;
-   if(!parentName){
+   const {reporterName}= req.body;
+   console.log("body :",req.body)
+   
+   if(!reporterName){
     return res.status(404).json({message:"missing parentName"})
    }
-   const parent = await MissingChild.findOne({parentName});
-   if(!parent){
+   const reporter = await MissingChild.findOne({reporterName});
+   console.log("reporter ",reporter);
+   if(!reporter){
     return res.status(404).json({message:"report not found"})
    }
-   res.status(200).json({message:parent})
+   res.status(200).json({message:reporter})
 }
 
 };

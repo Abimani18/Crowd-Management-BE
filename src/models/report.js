@@ -59,6 +59,7 @@ const foundChildReportSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  reporterPhoto: { type: String },
   handoverByPolice: {
     type:String,
     default: "Null",
