@@ -16,7 +16,6 @@ const missingChildController = {
   // ==========================
   // ✅ Create Missing Child Report + Send Push Alerts
   // ==========================
-<<<<<<< HEAD
   createMissingReport: async (req, res) => {
 
     // Multer uploaded files
@@ -61,75 +60,40 @@ const missingChildController = {
         reporterPhone,
         reportedAtPolice: req.user._id 
       });
-=======
-  // ==========================
-// ✅ Create Missing Child Report + Send Push Alerts
-// ==========================
-createMissingReport: async (req, res) => {
-  try {
-    const {
-      childName,
-      age,
-      gender,
-      photo,
-      dressDescription,
-      lastSeenLocation,
-      dateMissing,
-      missingTime,       // ✅ Added here
-      parentName,
-      parentPhone,
-      language,
-      fromWhere,
-    } = req.body;
 
-    if (!missingTime) {
-      return res.status(400).json({ message: "missingTime is required" });
-    }
->>>>>>> 1af9ac9a67575697ede9b729e9cea34a38de217f
-
-    // Create new report
-    const newReport = new MissingChild({
-      childName,
-      age,
-      gender,
-      photo,
-      language,
-      dressDescription,
-      lastSeenLocation,
-      dateMissing,
-      missingTime,       // ✅ Added here
-      fromWhere,
-      parentName,
-      parentPhone,
-      reportedAtPolice: req.user._id,
-    });
+ 
 
     await newReport.save();
 
     console.log(newReport);
 
-    // Notify all police with push tokens
-    const allPolice = await Police.find({ expoPushToken: { $exists: true } });
+    
+    const allPolice = await Police.find();
 
-    const messages = allPolice.map((p) => (
-      console.log(p),
-      {
-        to: p.expoPushToken,
-        sound: "alarme-401847.wav",
-        title: "New Missing Report",
-        body: `A report for ${childName} (${gender}, ${age}) was submitted.`,
-        data: { reportId: newReport._id },
-      }
-    ));
+    // Get only police with valid Expo tokens
+const validPolice = allPolice.filter(
+  p => p.expoPushToken && Expo.isExpoPushToken(p.expoPushToken)
+);
 
-    const chunks = expo.chunkPushNotifications(messages);
-    for (let chunk of chunks) {
-      try {
-        await expo.sendPushNotificationsAsync(chunk);
-      } catch (err) {
-        console.error("Push error:", err);
-      }
-    }
+const messages = validPolice.map(p => ({
+  to: p.expoPushToken,
+  sound: "default",
+  title: "New Missing Report",
+  body: `A report for ${childName} (${gender}, ${age}) was submitted.`,
+  data: { reportId: newReport._id },
+}));
+
+// Chunk + Send
+const chunks = expo.chunkPushNotifications(messages);
+
+for (const chunk of chunks) {
+  try {
+    await expo.sendPushNotificationsAsync(chunk);
+  } catch (err) {
+    console.error("Push error:", err);
+  }
+}
+
 
     // Response
     res.status(201).json({
