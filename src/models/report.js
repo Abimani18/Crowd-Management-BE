@@ -34,6 +34,10 @@ const foundChildReportSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+   foundTime:{
+     type: String,
+    required: true,
+  },
   description: {
     type: String,
   },
