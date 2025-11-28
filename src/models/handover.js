@@ -14,6 +14,7 @@ const CaseCloseSchema = new mongoose.Schema(
       enum: ["Pending", "Handover"],
       default: "Handover",
     },
+    handoverByPoliceID: { type: String, required: false },
   },
   { timestamps: true }
 );

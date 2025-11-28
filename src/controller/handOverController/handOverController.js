@@ -33,6 +33,7 @@ const handOverController = {
             missingreportID: matchingMissing._id,
             reporterImage,
             status: "Handover",
+            handoverByPoliceID: req.user._id,
           }).save();
 
           return res.json({
@@ -51,6 +52,7 @@ const handOverController = {
           foundchildID: reportId,
           reporterImage,
           status: "Handover",
+          handoverByPoliceID: req.user._id,
         }).save();
 
         return res.json({
@@ -71,6 +73,7 @@ const handOverController = {
           missingreportID: reportId,
           reporterImage,
           status: "Handover",
+          handoverByPoliceID: req.user._id,
         }).save();
 
         return res.json({
