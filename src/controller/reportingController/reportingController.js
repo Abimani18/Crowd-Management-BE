@@ -26,8 +26,8 @@ const foundChildController = {
           message: "childPhoto (file) and foundLocation are required",
         });
       }
-
-      const childPhotoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      console.log(req.file)
+      const childPhotoUrl =  req.file.location; 
 
       // Parse manual date
       let foundDate;
@@ -273,9 +273,9 @@ const foundChildController = {
   }
 },
   // ======================================
-  // ✅ CASE CLOSE + HANDOVER
+  // CASE CLOSE + HANDOVER
   // ======================================
-  caseClose: async (req, res) => {
+ /* caseClose: async (req, res) => {
     try {
       const { policeId, reporterName, finderId } = req.body;
       const reportId = req.params.id;
@@ -344,7 +344,7 @@ const foundChildController = {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
-  },
+  },*/
 
   // ======================================
   // ✅ Parent Lookup

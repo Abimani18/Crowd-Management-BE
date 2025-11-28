@@ -26,9 +26,7 @@ const missingChildController = {
     }
 
     // Convert each uploaded file to public URL
-    const photoUrls = files.map((file) => {
-      return `${req.protocol}://${req.get("host")}/uploads/${file.filename}`;
-    });
+    const photoUrls = files.map((file) => file.location);
 
     try {
       const {

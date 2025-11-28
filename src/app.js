@@ -7,6 +7,7 @@ const policeRouter = require("./routes/policeRouter");
 const missingRouter = require("./routes/missingRoter");
 const reportingRouter = require("./routes/reportingRouter");
 const volunteerRouter = require("./routes/volunteerRouter");
+const handoverRouter = require("./routes/handoverRoter");
 
 const path = require("path");
 
@@ -22,7 +23,7 @@ app.use("/api/police",policeRouter);
 app.use("/api/missing",missingRouter);
 app.use("/api/report",reportingRouter);
 app.use("/api/volunteer",volunteerRouter);
-
+app.use("/api/handover",handoverRouter);
 
 
 

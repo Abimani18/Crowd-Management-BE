@@ -2,7 +2,7 @@ const express = require("express");
 const Auth = require("../middleware/policeAuthMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 const reportController = require("../controller/reportingController/reportingController");
-const upload = require("../middleware/uploadMiddleware");
+const uploadS3 = require("../middleware/s3Upload");
 
 const reportingRouter = express.Router();
 
@@ -31,7 +31,7 @@ reportingRouter.post(
   "/create",
   Auth,
   roleMiddleware("Police"),
-  upload.single("childPhoto"),
+  uploadS3.single("childPhoto"),
   reportController.createFoundReport
 );
 
@@ -42,11 +42,6 @@ reportingRouter.post(
   reportController.matchWithMissingReport
 );
 
-reportingRouter.put(
-  "/caseClose/:id",
-  roleMiddleware("Police", "Admin"),
-  upload.single("reporterImage"),
-  reportController.caseClose
-);
+
 
 module.exports = reportingRouter;
